@@ -1,6 +1,8 @@
 package com.cmput660.com.universityparking;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,12 +15,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final SwipeRefreshLayout swipeView =(SwipeRefreshLayout)findViewById(R.id.swipe);
         parkingWebView = (WebView) findViewById(R.id.webView);
-
-        if (new CheckWiFi().isNetworkConnected(MainActivity.this)){
+        WebSettings parkingWebSettings = parkingWebView.getSettings();
+        parkingWebSettings.setJavaScriptEnabled(true);
+        swipeView.setColorSchemeResources(android.R.color.holo_blue_dark,android.R.color.holo_blue_light, android.R.color.holo_green_light,android.R.color.holo_green_dark);
+        swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+        {
+            @Override
+            public void onRefresh()
+            {
+                swipeView.setRefreshing(true);
+                ( new Handler()).postDelayed(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        swipeView.setRefreshing(false);
+                        parkingWebView.reload();
+                        //parkingWebView.loadUrl("http://www.youtube.com");
+                    }
+                }, 4000);
+            }
+        });
+        if (CheckWiFi.isNetworkConnected(MainActivity.this)){
             parkingWebView.setWebViewClient(new ParkingWebViewClient());
-            WebSettings parkingWebSettings = parkingWebView.getSettings();
-            parkingWebSettings.setJavaScriptEnabled(true);
+
             parkingWebView.loadUrl("http://www.youtube.com");
 
         }
